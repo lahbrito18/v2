@@ -63,7 +63,7 @@
 <script>
   const API_URL = 'https://preparaenade.onrender.com';
   const user = JSON.parse(localStorage.getItem("user"));
-  const loginArea = document.getElementById('loginArea');
+  const loginArea = document.getElementById('login-area');
 
   if (!user || !user.id) {
     alert("Usuário não está logado corretamente.");
@@ -94,24 +94,28 @@
       alert("Erro ao carregar os dados do perfil.");
     }
   }
+  const fotosPerfil = [
+  { id: 'padrao.png', src: 'img/Animais/padrao.png' },
+  { id: 'cachorro.png', src: 'img/Animais/cachorro.png' },
+  { id: 'gato.png', src: 'img/Animais/gato.png' },
+  { id: 'panda.png', src: 'img/Animais/panda.png' },
+  { id: 'tigre.png', src: 'img/Animais/tigre.png' }
+];
 
   carregarPerfil();
-  // 12. Área de login - mostrar dados do usuário ou botão de login
   if (user && Object.keys(user).length > 0 && loginArea) {
-    const displayName = user.nickname ? user.nickname : user.name;
-    // Ajuste para foto: no seu form você salva fotoId, então pegue o src pelo id:
-    const fotoObj = fotosPerfil.find(f => f.id === user.fotoId);
-    const profilePhoto = fotoObj ? fotoObj.src : 'img/Animais/do-utilizador.png';
+  const displayName = user.nickname ? user.nickname : user.name;
+  const fotoObj = fotosPerfil.find(f => f.id === user.fotoId);
+  const profilePhoto = fotoObj ? fotoObj.src : 'img/Animais/do-utilizador.png';
 
-    loginArea.innerHTML = `
-      <div class="user-info" onclick="window.location.href='perfil.html'" style="cursor: pointer;">
-          <img src="${profilePhoto}" alt="Foto de Perfil" class="profile-photo">
-          <span class="user-name">${displayName || ''}</span>
-          <button onclick="logout(event)" class="btn-login">Sair</button>
-      </div>
-    `;
-  }
-
+  loginArea.innerHTML = `
+    <div class="user-info" onclick="window.location.href='perfil.html'" style="cursor: pointer;">
+        <img src="${profilePhoto}" alt="Foto de Perfil" class="profile-photo">
+        <span class="user-name">${displayName || ''}</span>
+        <button onclick="logout(event)" class="btn-login">Sair</button>
+    </div>
+  `;
+}
   // 13. Função logout
   function logout(event) {
     event.stopPropagation();
