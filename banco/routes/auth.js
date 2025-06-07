@@ -142,6 +142,19 @@ router.post('/forgot-password', (req, res) => {
   });
 });
 
+router.get('/api/usuario/:id', (req, res) => {
+  const id = req.params.id;
+  db.get('SELECT id, name, email, apelido, pais, foto FROM users WHERE id = ?', [id], (err, user) => {
+    if (err) {
+      return res.status(500).json({ erro: 'Erro ao buscar usuário.' });
+    }
+    if (!user) {
+      return res.status(404).json({ erro: 'Usuário não encontrado.' });
+    }
+    res.json(user);
+  });
+});
+
 // Resetar senha
 router.post('/reset-password', (req, res) => {
   const { token, newPassword } = req.body;
