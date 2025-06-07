@@ -63,6 +63,7 @@
 <script>
   const API_URL = 'https://preparaenade.onrender.com';
   const user = JSON.parse(localStorage.getItem("user"));
+  const loginArea = document.getElementById('loginArea');
 
   if (!user || !user.id) {
     alert("Usuário não está logado corretamente.");
