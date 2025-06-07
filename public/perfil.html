@@ -83,7 +83,7 @@
 
       const usuario = await resposta.json();
 
-      document.getElementById("nome").value = usuario.nome || "";
+      document.getElementById("nome").value = usuario.name || "";
       document.getElementById("apelido").value = usuario.apelido || "";
       document.getElementById("email").value = usuario.email || "";
       document.getElementById("pais").value = usuario.pais || "";
