@@ -73,7 +73,7 @@
 
   async function carregarPerfil() {
     try {
-      const resposta = await fetch(`${API_URL}/api/users/${userId}`);
+      const resposta = await fetch(`${API_URL}/api/auth/usuario/${userId}`);
       if (!resposta.ok) throw new Error("Erro ao buscar dados do usuário.");
 
       const contentType = resposta.headers.get("content-type");
