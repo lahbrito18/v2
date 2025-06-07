@@ -61,63 +61,40 @@
 </main>
 
 <script>
+  <script>
   const API_URL = 'https://preparaenade.onrender.com';
   const userId = localStorage.getItem("id");
 
-  // Carrega os dados do usuário para preencher o formulário
+  if (!userId) {
+    alert("ID do usuário não encontrado.");
+    throw new Error("ID do usuário não está disponível.");
+  }
+
   async function carregarPerfil() {
     try {
       const resposta = await fetch(`${API_URL}/api/usuario/${userId}`);
+      if (!resposta.ok) throw new Error("Erro ao buscar dados do usuário.");
+
+      const contentType = resposta.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Resposta da API não está em JSON.");
+      }
+
       const usuario = await resposta.json();
 
       document.getElementById("nome").value = usuario.nome || "";
       document.getElementById("apelido").value = usuario.apelido || "";
       document.getElementById("email").value = usuario.email || "";
       document.getElementById("pais").value = usuario.pais || "";
-      document.getElementById("foto").value = usuario.foto || "img/Animais/padrao.png";
-      document.getElementById("foto-preview").src = usuario.foto || "img/Animais/padrao.png";
+      document.getElementById("foto").value = usuario.foto || "padrao.png";
+      document.getElementById("foto-preview").src = `img/Animais/${usuario.foto || "do-utilizador.png"}`;
     } catch (error) {
       console.error("Erro ao carregar perfil:", error);
       alert("Erro ao carregar os dados do perfil.");
     }
   }
 
-  // Atualiza a imagem de preview ao escolher outro avatar
-  document.getElementById("foto").addEventListener("change", function () {
-    document.getElementById("foto-preview").src = this.value;
-  });
-
-  // Atualiza os dados no banco ao salvar
-  document.getElementById("perfil-form").addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const dadosAtualizados = {
-      nome: document.getElementById("nome").value,
-      apelido: document.getElementById("apelido").value,
-      email: document.getElementById("email").value,
-      pais: document.getElementById("pais").value,
-      foto: document.getElementById("foto").value
-    };
-
-    try {
-      const resposta = await fetch(`${API_URL}/api/usuario/${userId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(dadosAtualizados)
-      });
-
-      if (!resposta.ok) throw new Error("Erro ao atualizar dados.");
-      alert("Perfil atualizado com sucesso!");
-    } catch (error) {
-      console.error("Erro ao atualizar perfil:", error);
-      alert("Erro ao atualizar perfil.");
-    }
-  });
-
   carregarPerfil();
-
   // 12. Área de login - mostrar dados do usuário ou botão de login
   if (user && Object.keys(user).length > 0 && loginArea) {
     const displayName = user.nickname ? user.nickname : user.name;
