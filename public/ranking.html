@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Prepara Enade</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" type="image/x-icon" href="img/icon.png" />
+</head>
+<body>
+    <header>
+        <a href="index.html" class="logo">
+          <img src="img/icon.png" alt="Ícone de livro" class="logo-icon">
+          Prepara Enade
+        </a>
+        <nav>
+            <div class="hamburger" onclick="toggleMenu()">☰</div>
+            <ul>
+                <li><a href="index.html">Início</a></li>
+                <li><a href="simulados.html">Simulados</a></li>
+                <li><a href="ranking.html">Ranking</a></li>
+                <li><a href="questoes.html">Questões</a></li>
+            </ul>
+        </nav>
+        <div id="login-area">
+            <button class="btn-login" onclick="window.location.href='login.html'">Login</button>
+        </div>
+    </header>
+
+    <main>
+            <section class="container">
+        <h2>Ranking de Pontuação</h2>
+        <p>Acompanhe sua posição e veja quem são os melhores no estudo para o Enade.</p>
+
+        <div class="ranking-tabela">
+    <div class="tabela-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="6" style="text-align: center; font-size: 1.2em; background-color: #f0f0f0;">
+                    🏆 Ranking Geral
+                    </th>
+                </tr>
+                <tr>
+                    <th>#</th>
+                    <th>Medalha</th>
+                    <th>Foto</th>
+                    <th>Apelido</th>
+                    <th>Bandeira</th>
+                    <th>Pontos</th>
+                </tr>
+            </thead>
+            <tbody id="ranking-geral-body">
+                <!-- Conteúdo via JS -->
+            </tbody>
+        </table>
+    </div>
+</div>
+    </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Plataforma Enade - Todos os direitos reservados</p>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let links = document.querySelectorAll("nav ul li a");
+            let currentPage = window.location.pathname.split("/").pop();
+
+            links.forEach((link) => {
+                if (link.getAttribute("href") === currentPage) {
+                    link.classList.add("active");
+                }
+            });
+
+            const user = JSON.parse(localStorage.getItem("user"));
+            const loginArea = document.getElementById('login-area');
+
+if (user && loginArea) {
+    const displayName = user.nickname ? user.nickname : user.name;
+    const profilePhoto = user.foto ? user.foto : 'img/Animais/do-utilizador.png';
+
+    loginArea.innerHTML = `
+        <div class="user-info" onclick="window.location.href='perfil.html'" style="cursor: pointer;">
+            <img src="${profilePhoto}" alt="Foto de Perfil" class="profile-photo">
+            <span class="user-name">${displayName}</span>
+            <button onclick="logout(event)" class="btn-login">Sair</button>
+        </div>
+        
+    `;
+}
+
+            carregarRankingGeral();
+            carregarSalasDoUsuario();
+        });
+function logout(event) {
+        event.stopPropagation();
+        localStorage.removeItem('user');
+        window.location.href = 'index.html';
+    }
+
+async function carregarRankingGeral() {
+    try {
+        const response = await fetch("https://prepara-enade.onrender.com/api/auth/ranking");
+        const ranking = await response.json();
+
+        const tbody = document.getElementById("ranking-geral-body");
+        tbody.innerHTML = "";
+
+        if (!Array.isArray(ranking) || ranking.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6">Nenhum usuário encontrado no ranking.</td></tr>`;
+            return;
+        }
+
+        // Usuário logado (assumindo que existe)
+        const user = JSON.parse(localStorage.getItem("user"));
+        const userIdLogado = user.id;
+
+        // Pega os 30 primeiros
+        const top30 = ranking.slice(0, 30);
+
+        // Verifica se o usuário logado está entre os 30 primeiros
+        const posicaoUsuarioNoTop30 = top30.findIndex(u => u.id === userIdLogado);
+
+        // Monta as linhas para os 30 primeiros
+        top30.forEach((usuario, index) => {
+            const tr = document.createElement("tr");
+             if (usuario.id === userIdLogado) {
+        tr.classList.add("linha-usuario-logado");}
+
+            const foto = usuario.foto && usuario.foto.trim() !== ""
+                ? usuario.foto
+                : "img/Animais/do-utilizador.png";
+
+            const nomeCompleto = usuario.name || "Sem nome";
+            const apelido = usuario.apelido && usuario.apelido.trim() !== ""
+                ? usuario.apelido
+                : nomeCompleto.split(" ")[0];
+
+            const bandeira = usuario.bandeira && usuario.bandeira.trim() !== ""
+                ? usuario.bandeira
+                : "img/bandeiras/br.png";
+
+            const pontos = usuario.total_pontos ?? 0;
+
+            let medalhaOuPonto = "";
+            if (index === 0) medalhaOuPonto = "🥇";
+            else if (index === 1) medalhaOuPonto = "🥈";
+            else if (index === 2) medalhaOuPonto = "🥉";
+            else medalhaOuPonto = "•••";
+
+            tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${medalhaOuPonto}</td>
+                <td><img src="${foto}" alt="Foto de ${apelido}" class="ranking-foto"></td>
+                <td>${apelido}</td>
+                <td><img src="${bandeira}" alt="Bandeira de ${apelido}" class="ranking-bandeira"></td>
+                <td>${pontos}</td>
+            `;
+
+            tbody.appendChild(tr);
+        });
+
+        // Se usuário NÃO está entre os 30 primeiros, mostrar ele na última linha
+        if (posicaoUsuarioNoTop30 === -1) {
+            // Procura a posição dele no ranking completo
+            const posicaoUsuario = ranking.findIndex(u => u.id === userIdLogado);
+            if (posicaoUsuario !== -1) {
+                const usuario = ranking[posicaoUsuario];
+
+                const foto = usuario.foto && usuario.foto.trim() !== ""
+                    ? usuario.foto
+                    : "img/Animais/do-utilizador.png";
+
+                const nomeCompleto = usuario.name || "Sem nome";
+                const apelido = usuario.apelido && usuario.apelido.trim() !== ""
+                    ? usuario.apelido
+                    : nomeCompleto.split(" ")[0];
+
+                const bandeira = usuario.bandeira && usuario.bandeira.trim() !== ""
+                    ? usuario.bandeira
+                    : "img/bandeiras/br.png";
+
+                const pontos = usuario.total_pontos ?? 0;
+
+                // Colocação simples com ponto (•)
+                const medalhaOuPonto = "•••";
+
+                // Linha separadora para visualização (opcional)
+                const trSeparador = document.createElement("tr");
+                trSeparador.innerHTML = `<td colspan="6" style="text-align:center;">...</td>`;
+                tbody.appendChild(trSeparador);
+
+                const tr = document.createElement("tr");
+                tr.classList.add("linha-usuario-logado");
+                tr.innerHTML = `
+                    <td>${posicaoUsuario + 1}</td>
+                    <td>${medalhaOuPonto}</td>
+                    <td><img src="${foto}" alt="Foto de ${apelido}" class="ranking-foto"></td>
+                    <td>${apelido}</td>
+                    <td><img src="${bandeira}" alt="Bandeira de ${apelido}" class="ranking-bandeira"></td>
+                    <td>${pontos}</td>
+                `;
+
+                tbody.appendChild(tr);
+            }
+        }
+
+    } catch (error) {
+        console.error("Erro ao carregar ranking geral:", error);
+        const tbody = document.getElementById("ranking-geral-body");
+        tbody.innerHTML = `<tr><td colspan="6">Erro ao carregar dados.</td></tr>`;
+    }
+}
+    </script>
+</body>
+</html>

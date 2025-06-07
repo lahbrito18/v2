@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prepara Enade</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="img/icon.png" />
+</head>
+<body>
+<header>
+  <a href="index.html" class="logo">
+    <img src="img/icon.png" alt="Ícone de livro" class="logo-icon" />
+    Prepara Enade
+  </a>
+  <nav>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <ul>
+      <li><a href="index.html">Início</a></li>
+      <li><a href="simulados.html">Simulados</a></li>
+      <li><a href="ranking.html">Ranking</a></li>
+      <li><a href="questoes.html">Questões</a></li>
+    </ul>
+  </nav>
+  <div id="login-area">
+    <button class="btn-login" onclick="window.location.href='login.html'">Login</button>
+  </div>
+</header>
+
+<main>
+  <div class="form-wrapper">
+    <h2>Meu Perfil</h2>
+    <button id="editar-btn" class="btn-editar" type="button">Editar</button>
+
+    <form id="perfil-form" novalidate>
+      <label>Foto de Perfil:</label>
+      <div id="fotos-container" class="fotos-container"></div>
+
+      <label for="nome">Nome Completo:</label>
+      <input type="text" id="nome" name="nome" required disabled />
+
+      <label for="apelido">Apelido:</label>
+      <input type="text" id="apelido" name="apelido" disabled />
+
+      <label for="email">E-mail:</label>
+      <input type="email" id="email" name="email" readonly />
+
+      <label id="pais-label" for="pais">País</label>
+      <div id="custom-select-container" class="custom-select" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="pais-label">
+        <div class="pais-selecionado" id="pais-selecionado" aria-live="polite" aria-atomic="true"></div>
+        <ul id="lista-paises" class="lista-paises" role="listbox" tabindex="-1" aria-label="Lista de países"></ul>
+      </div>
+      <input type="hidden" id="pais" name="pais" />
+
+      <button type="button" id="btn-nova-senha" class="btn" onclick="window.location.href='reset-password.html'">Redefinir Senha</button>
+
+      <button type="submit" class="btn" id="salvar-btn" style="display: none;">Salvar Alterações</button>
+    </form>
+  </div>
+</main>
+
+<footer>
+  <p>&copy; 2025 Plataforma Enade - Todos os direitos reservados</p>
+</footer>
+
+<script>
+  // 1. Carregue o user logo no começo
+  const user = JSON.parse(localStorage.getItem('user')) || {};
+
+  // 2. Dados básicos e constantes
+  const paises = [
+    { code: "ad", nome: "Andorra", img: "img/bandeiras/ad.png" },
+    { code: "br", nome: "Brasil", img: "img/bandeiras/br.png" },
+    { code: "zw", nome: "Zimbabwe", img: "img/bandeiras/zw.png" }
+  ];
+
+  const fotosPerfil = [
+    { id: 1, src: "img/Animais/do-utilizador.png" },
+    { id: 2, src: "img/Animais/aranha.png" }
+  ];
+
+  // 3. Referências aos elementos do DOM
+  const nomeInput = document.getElementById("nome");
+  const apelidoInput = document.getElementById("apelido");
+  const emailInput = document.getElementById("email");
+  const fotosContainer = document.getElementById("fotos-container");
+  const paisSelecionado = document.getElementById("pais-selecionado");
+  const listaPaises = document.getElementById("lista-paises");
+  const paisHiddenInput = document.getElementById("pais");
+  const form = document.getElementById("perfil-form");
+  const customSelect = document.getElementById("custom-select-container");
+  const editarBtn = document.getElementById("editar-btn");
+  const salvarBtn = document.getElementById("salvar-btn");
+  const loginArea = document.getElementById('login-area');
+
+  // 4. Inicialize as variáveis que dependem do user
+  let paisAtual = user.pais || "br";
+  let fotoSelecionadaId = user.fotoId || 1;
+
+  // 5. Função para atualizar seleção de país
+  function atualizarPaisSelecionado(code) {
+    const pais = paises.find(p => p.code === code);
+    if (pais) {
+      paisSelecionado.innerHTML = `
+        <img src="${pais.img}" alt="Bandeira de ${pais.nome}" />
+        <span>${pais.nome}</span>
+      `;
+      paisHiddenInput.value = pais.code;
+      paisAtual = pais.code;
+    }
+  }
+
+  // 6. Popular lista de países
+  function popularListaPaises() {
+    listaPaises.innerHTML = "";
+    paises.forEach(pais => {
+      const li = document.createElement("li");
+      li.setAttribute("role", "option");
+      li.setAttribute("tabindex", "-1");
+      li.dataset.code = pais.code;
+      li.innerHTML = `
+        <img src="${pais.img}" alt="Bandeira de ${pais.nome}" />
+        <span>${pais.nome}</span>
+      `;
+      if (pais.code === paisAtual) {
+        li.classList.add("selected");
+        li.setAttribute("aria-selected", "true");
+      }
+      listaPaises.appendChild(li);
+    });
+  }
+
+  // 7. Dropdown e seleção país (mantém seu código original) ...
+
+  // 8. Inicializar campos com dados do user
+  nomeInput.value = user.name || "";
+  apelidoInput.value = user.nickname || "";
+  emailInput.value = user.email || "";
+  atualizarPaisSelecionado(paisAtual);
+  popularListaPaises();
+
+  // 9. Carregar fotos e seleção de perfil
+  function carregarFotosPerfil() {
+    fotosContainer.innerHTML = "";
+    fotosPerfil.forEach(foto => {
+      const img = document.createElement("img");
+      img.src = foto.src;
+      img.alt = `Foto de perfil ${foto.id}`;
+      img.classList.add("foto-opcao");
+      if (foto.id === fotoSelecionadaId) img.classList.add("selecionada");
+      img.dataset.id = foto.id;
+      img.tabIndex = 0;
+
+      img.addEventListener("click", () => {
+        fotoSelecionadaId = foto.id;
+        atualizarSelecaoFoto();
+      });
+      img.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          fotoSelecionadaId = foto.id;
+          atualizarSelecaoFoto();
+        }
+      });
+
+      fotosContainer.appendChild(img);
+    });
+  }
+
+  function atualizarSelecaoFoto() {
+    fotosContainer.querySelectorAll("img").forEach(img => {
+      img.classList.toggle("selecionada", parseInt(img.dataset.id, 10) === fotoSelecionadaId);
+    });
+  }
+
+  carregarFotosPerfil();
+
+  // 10. Botão editar
+  editarBtn.addEventListener("click", () => {
+    form.querySelectorAll("input[type=text]").forEach(campo => campo.disabled = false);
+    salvarBtn.style.display = "inline-block";
+    editarBtn.style.display = "none";
+    customSelect.tabIndex = 0;
+  });
+
+  // 11. Salvar formulário
+  form.addEventListener("submit", e => {
+    e.preventDefault();
+
+    if (!nomeInput.value.trim()) {
+      alert("O nome completo é obrigatório.");
+      return;
+    }
+
+    const userAtualizado = {
+      ...user,
+      name: nomeInput.value.trim(),
+      nickname: apelidoInput.value.trim(),
+      pais: paisAtual,
+      fotoId: fotoSelecionadaId
+    };
+
+    localStorage.setItem("user", JSON.stringify(userAtualizado));
+
+    nomeInput.disabled = true;
+    apelidoInput.disabled = true;
+    customSelect.tabIndex = -1;
+    salvarBtn.style.display = "none";
+    editarBtn.style.display = "inline-block";
+
+    alert("Perfil atualizado com sucesso!");
+  });
+
+  // 12. Área de login - mostrar dados do usuário ou botão de login
+  if (user && Object.keys(user).length > 0 && loginArea) {
+    const displayName = user.nickname ? user.nickname : user.name;
+    // Ajuste para foto: no seu form você salva fotoId, então pegue o src pelo id:
+    const fotoObj = fotosPerfil.find(f => f.id === user.fotoId);
+    const profilePhoto = fotoObj ? fotoObj.src : 'img/Animais/do-utilizador.png';
+
+    loginArea.innerHTML = `
+      <div class="user-info" onclick="window.location.href='perfil.html'" style="cursor: pointer;">
+          <img src="${profilePhoto}" alt="Foto de Perfil" class="profile-photo">
+          <span class="user-name">${displayName || ''}</span>
+          <button onclick="logout(event)" class="btn-login">Sair</button>
+      </div>
+    `;
+  }
+
+  // 13. Função logout
+  function logout(event) {
+    event.stopPropagation();
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+  }
+</script>
+
+</body>
+</html>
