@@ -27,6 +27,32 @@
   </div>
 </header>
 
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prepara Enade - Meu Perfil</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="img/icon.png" />
+</head>
+<body>
+<header>
+  <a href="index.html" class="logo">
+    <img src="img/icon.png" alt="Ícone de livro" class="logo-icon" />
+    Prepara Enade
+  </a>
+  <nav>
+    <div class="hamburger" onclick="toggleMenu()">☰</div>
+    <ul>
+      <li><a href="index.html">Início</a></li>
+      <li><a href="simulados.html">Simulados</a></li>
+      <li><a href="ranking.html">Ranking</a></li>
+      <li><a href="questoes.html">Questões</a></li>
+    </ul>
+  </nav>
+</header>
+
 <main>
   <section class="perfil-container">
     <h1>Meu Perfil</h1>
@@ -35,11 +61,11 @@
         <img id="foto-preview" src="img/Animais/padrao.png" alt="Foto de Perfil" />
         <label for="foto">Escolha seu avatar:</label>
         <select id="foto" name="foto">
+          <option value="img/Animais/padrao.png">Padrão</option>
           <option value="img/Animais/cachorro.png">Cachorro</option>
           <option value="img/Animais/gato.png">Gato</option>
           <option value="img/Animais/panda.png">Panda</option>
           <option value="img/Animais/tigre.png">Tigre</option>
-          <option value="img/Animais/padrao.png">Padrão</option>
         </select>
       </div>
 
@@ -62,18 +88,12 @@
 
 <script>
   const API_URL = 'https://preparaenade.onrender.com';
+  const userId = localStorage.getItem("usuarioId");
 
+  // Carrega os dados do usuário para preencher o formulário
   async function carregarPerfil() {
-    const userId = localStorage.getItem("usuarioId");
-    if (!userId) {
-      alert("Usuário não logado.");
-      window.location.href = "login.html";
-      return;
-    }
-
     try {
       const resposta = await fetch(`${API_URL}/api/usuario/${userId}`);
-      if (!resposta.ok) throw new Error("Erro ao buscar dados do usuário.");
       const usuario = await resposta.json();
 
       document.getElementById("nome").value = usuario.nome || "";
@@ -88,14 +108,14 @@
     }
   }
 
+  // Atualiza a imagem de preview ao escolher outro avatar
   document.getElementById("foto").addEventListener("change", function () {
-    const imgPath = this.value;
-    document.getElementById("foto-preview").src = imgPath;
+    document.getElementById("foto-preview").src = this.value;
   });
 
+  // Atualiza os dados no banco ao salvar
   document.getElementById("perfil-form").addEventListener("submit", async function (e) {
     e.preventDefault();
-    const userId = localStorage.getItem("usuarioId");
 
     const dadosAtualizados = {
       nome: document.getElementById("nome").value,
