@@ -142,7 +142,7 @@ router.post('/forgot-password', (req, res) => {
   });
 });
 
-router.get('/api/usuario/:id', (req, res) => {
+router.get('/usuario/:id', (req, res) => {
   const id = req.params.id;
   db.get('SELECT id, name, email, apelido, pais, foto FROM users WHERE id = ?', [id], (err, user) => {
     if (err) {
