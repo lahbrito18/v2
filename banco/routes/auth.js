@@ -94,8 +94,8 @@ router.post('/forgot-password', (req, res) => {
       port: 465,
       secure: true,
       auth: {
-        user: 'contatopreparaenade@gmail.com',
-        pass: 'Yitp meyo sbuq tnqg' // cuidado com dados sensíveis no código!
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
       }
     });
 
