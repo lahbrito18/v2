@@ -18,7 +18,7 @@ router.post('/registro', async (req, res) => {
   }
 
   try {
-    const userExists = await pool.query('SELECT id FROM usuarios WHERE email = $1', [email]);
+    const userExists = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
     
     if (userExists.rows.length > 0) {
       return res.status(400).json({ message: 'Usuário já existe.' });
@@ -27,7 +27,7 @@ router.post('/registro', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
-      'INSERT INTO usuarios (nome, email, senha, pontos) VALUES ($1, $2, $3, $4) RETURNING id',
+      'INSERT INTO users (nome, email, senha, pontos) VALUES ($1, $2, $3, $4) RETURNING id',
       [name, email, hashedPassword, 0]
     );
 
