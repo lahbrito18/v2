@@ -84,15 +84,15 @@
             }
             
             try {
-                const resposta = await fetch("/api/auth/cadastro", {
+                const resposta = await fetch("/api/auth/registro", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        nome: nome,
+                        name: nome,
                         email: email,
-                        senha: senha
+                        password: senha
                     })
                 });
                 
