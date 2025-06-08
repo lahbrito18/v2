@@ -9,11 +9,11 @@ const resetTokens = {};
 
 // ===== MANTER APENAS POSTGRESQL =====
 
-// Rota de cadastro (MANTER ESTA)
-router.post('/cadastro', async (req, res) => {
-  const { nome, email, senha } = req.body;
+// Rota adicional para compatibilidade com frontend
+router.post('/registro', async (req, res) => {
+  const { name, email, password } = req.body;
   
-  if (!nome || !email || !senha) {
+  if (!name || !email || !password) {
     return res.status(400).json({ message: 'Todos os campos são obrigatórios.' });
   }
 
@@ -24,18 +24,19 @@ router.post('/cadastro', async (req, res) => {
       return res.status(400).json({ message: 'Usuário já existe.' });
     }
 
-    const hashedPassword = await bcrypt.hash(senha, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
       'INSERT INTO usuarios (nome, email, senha, pontos) VALUES ($1, $2, $3, $4) RETURNING id',
-      [nome, email, hashedPassword, 0]
+      [name, email, hashedPassword, 0]
     );
 
     const userId = result.rows[0].id;
 
     res.status(201).json({
       message: 'Usuário cadastrado com sucesso!',
-      userId: userId
+      userId: userId,
+      usuario: { id: userId, nome: name, email: email }
     });
 
   } catch (error) {
