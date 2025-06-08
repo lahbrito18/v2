@@ -2,13 +2,12 @@ const express = require('express');
 const db = require('../db');
 const router = express.Router();
 
-// Listar todas as questões com alternativas
+// 📌 Listar todas as questões com suas alternativas
 router.get('/', (req, res) => {
   db.all(`SELECT * FROM questions`, [], (err, questions) => {
     if (err) return res.status(500).json({ error: err.message });
 
     const results = [];
-
     let pending = questions.length;
 
     if (pending === 0) return res.json([]);
@@ -25,28 +24,29 @@ router.get('/', (req, res) => {
   });
 });
 
-// Inserir questão + alternativas
+// ✅ Inserir uma nova questão com alternativas
 router.post('/', (req, res) => {
-  const { enunciado, categoria, banca, ano, alternativas, comentario } = req.body;  // inclua comentario
+  const { enunciado, categoria, banca, ano, alternativas, comentario } = req.body;
 
-  console.log('Recebido no backend:', req.body);
+  if (!enunciado || !categoria || !banca || !ano || !alternativas || !Array.isArray(alternativas)) {
+    return res.status(400).json({ error: 'Dados inválidos ou incompletos.' });
+  }
 
   db.run(
     `INSERT INTO questions (enunciado, categoria, banca, ano, comentario) VALUES (?, ?, ?, ?, ?)`,
-    [enunciado, categoria, banca, ano, comentario],  // passe comentario aqui
+    [enunciado, categoria, banca, ano, comentario],
     function (err) {
       if (err) return res.status(500).json({ error: err.message });
 
       const questionId = this.lastID;
 
+      const stmt = db.prepare(`INSERT INTO alternativas (question_id, texto, correta) VALUES (?, ?, ?)`);
       alternativas.forEach(alt => {
-        db.run(
-          `INSERT INTO alternativas (question_id, texto, correta) VALUES (?, ?, ?)`,
-          [questionId, alt.texto, alt.correta ? 1 : 0]
-        );
+        stmt.run(questionId, alt.texto, alt.correta ? 1 : 0);
       });
+      stmt.finalize();
 
-      res.json({ message: 'Questão cadastrada com sucesso' });
+      res.json({ message: 'Questão cadastrada com sucesso', id: questionId });
     }
   );
 });
