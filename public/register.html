@@ -67,45 +67,43 @@
     <script>
         document.getElementById("register-form").addEventListener("submit", async function(event) {
             event.preventDefault();
-
+            
             const nome = document.getElementById("nome").value;
             const email = document.getElementById("email").value;
             const senha = document.getElementById("senha").value;
             const confirmarSenha = document.getElementById("confirmar-senha").value;
-
             const mensagemErro = document.getElementById("mensagem-erro");
+            
             mensagemErro.style.display = "none";
             mensagemErro.textContent = "";
-
+            
             if (senha !== confirmarSenha) {
                 mensagemErro.textContent = "As senhas não coincidem.";
                 mensagemErro.style.display = "block";
                 return;
             }
-
+            
             try {
-                const resposta = await fetch("https://prepara-enade.onrender.com/api/auth/registro", {
+                const resposta = await fetch("/api/auth/cadastro", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        name: nome,
+                        nome: nome,
                         email: email,
-                        password: senha
-                        // Removido 'foto' e 'pais'
+                        senha: senha
                     })
                 });
-
+                
                 const resultado = await resposta.json();
                 console.log(resultado);
-
+                
                 if (resposta.ok) {
-                    // Salva o usuário no localStorage sem 'pais' e 'foto'
-                    localStorage.setItem("user", JSON.stringify(resultado.usuario));
+                    alert("Cadastro realizado com sucesso!");
                     window.location.href = "login.html";
                 } else {
-                    mensagemErro.textContent = "Erro: " + (resultado.erro || resultado.message || "Não foi possível concluir o cadastro.");
+                    mensagemErro.textContent = "Erro: " + (resultado.message || "Não foi possível concluir o cadastro.");
                     mensagemErro.style.display = "block";
                 }
             } catch (erro) {
