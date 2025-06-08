@@ -50,7 +50,7 @@ router.post('/login', async (req, res) => {
   const { email, senha } = req.body;
 
   try {
-    const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     
     if (result.rows.length === 0) {
       return res.status(401).json({ message: 'Credenciais inválidas' });
@@ -79,7 +79,7 @@ router.post('/forgot-password', async (req, res) => {
   if (!email) return res.status(400).json({ message: 'E-mail é obrigatório.' });
 
   try {
-    const result = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'Usuário não encontrado.' });
@@ -89,7 +89,7 @@ router.post('/forgot-password', async (req, res) => {
     const expires = Date.now() + 3600000;
     resetTokens[token] = { email, expires };
 
-    const resetLink = `https://prepara-enade.onrender.com/reset-password.html?token=${token}`;
+    const resetLink = `https://preparaenade.onrender.com/reset-password.html?token=${token}`;
 
     const transporter = nodemailer.createTransporter({
       host: 'smtp.gmail.com',
