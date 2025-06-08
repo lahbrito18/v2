@@ -1,22 +1,30 @@
 {
-  "name": "banco",
+  "name": "prepara-enade-backend",
   "version": "1.0.0",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
+    "dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["enade", "questoes", "educacao"],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Backend para sistema de questões do ENADE",
   "dependencies": {
-    "bcryptjs": "^3.0.2",
-    "body-parser": "^2.2.0",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
     "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "nodemailer": "^7.0.3",
-    "sqlite": "^5.1.1",
-    "sqlite3": "^5.1.7"
+    "crypto": "^1.0.1",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "nodemailer": "^6.9.7",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }
